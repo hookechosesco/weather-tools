@@ -1,19 +1,19 @@
 while true
 do
-read -p "What do you want to do? 
-[1] metar
-[2] skewt
-[3] meteogram
-[4] GOES
+read -p "What do you want to do?
+[1] METAR
+[2] TAF
+[3] Skew T
+[4] Meteogram
+[5] GOES
 --> " choice
 
-# read choice
-
-if [[ $choice -eq 1 ]]; then ./metar.py
-elif [[ $choice -eq 2 ]]; then ./skewt.py
-elif [[ $choice -eq 3 ]]; then ./meteogram.py
-elif [[ $choice -eq 4 ]]; then ./goes_imagery.py
-else echo "Enter a valid option"
+if [[ $choice -eq 1 ]]; then python metar.py
+elif [[ $choice -eq 2 ]]; then python taf.py
+elif [[ $choice -eq 3 ]]; then python skewt.py
+elif [[ $choice -eq 4 ]]; then python meteogram.py
+elif [[ $choice -eq 5 ]]; then python goes_imagery.py
+else echo "Enter a valid choice"
 fi
 echo ""
 done

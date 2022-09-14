@@ -1,5 +1,3 @@
-#!/Users/virgil/anaconda3/envs/metr/bin/python
-
 import itertools
 import os
 import sys

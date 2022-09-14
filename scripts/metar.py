@@ -1,5 +1,3 @@
-#!/Users/virgil/anaconda3/envs/metr/bin/python
-
 import requests
 from bs4 import BeautifulSoup
 # import sys

@@ -33,6 +33,29 @@ def to_wind_chill(T, wspd):
     return windchill
 
 
+def my_wetbulb(p, T, Td):
+    it = np.nditer([p, T, Td, None],
+                       op_dtypes=['float', 'float', 'float', 'float'],
+                       flags=['buffered'])
+    n = 0
+    for press, temp, dewp, ret in it:
+        n += 1
+        press = press * p.units
+        temp = temp * T.units
+        dewp = dewp * Td.units
+        lcl_pressure, lcl_temperature = mpcalc.lcl(press, temp, dewp)
+        moist_adiabat_temperatures = mpcalc.moist_lapse(concatenate([lcl_pressure, press]),
+                                                 lcl_temperature)
+        if moist_adiabat_temperatures.size == 0:
+            print(f'Dewpoint Depression = 0 at {press}')
+#             ret[...] = ((temp.m + dewp.m)/2) * T.units
+            ret[...] = np.nan
+        else:
+    #     print(f'{n} {press.m} {temp.m:.2f} {dewp.m:.2f} {moist_adiabat_temperatures.size}')
+            ret[...] = moist_adiabat_temperatures[-1].magnitude
+    return it.operands[3] * moist_adiabat_temperatures.units
+
+
 def get_metar_meteogram(icao, hoursback=None):
     """
     Download METAR from the NOAA Avation Weather Center
@@ -92,9 +115,12 @@ def meteogram(icao, hoursback):
     df.loc[df['tempF'] > 50, ['wind_chill']] = np.nan
 #     unit_df = pandas_dataframe_to_unit_arrays(df, column_units=df.units)
     try:
-        df['wet_bulb'] = mpcalc.wet_bulb_temperature(df['air_pressure_at_sea_level'].values*units('hPa'),
-                                                 df['air_temperature'].values*units('degC'),
-                                                 df['dew_point_temperature'].values*units('degC')).to('degF').m
+        # df['wet_bulb'] = mpcalc.wet_bulb_temperature(df['air_pressure_at_sea_level'].values*units('hPa'),
+        #                                          df['air_temperature'].values*units('degC'),
+        #                                          df['dew_point_temperature'].values*units('degC')).to('degF').m
+        df['wet_bulb'] = my_wetbulb(df['air_pressure_at_sea_level'].values*units('hPa'),
+                                                df['air_temperature'].values*units('degC'),
+                                                df['dew_point_temperature'].values*units('degC')).to('degF')
     except ValueError as e:
         print("Can't calculate wet bulb")
         df['wet_bulb'] = np.nan
@@ -207,4 +233,7 @@ if __name__ == '__main__':
     pk_wnds = [x.split('AO2 PK WND ')[1][0:10] for x in rmks if 'PK WND' in x]
     pk_dict = dict(zip([x.split('/')[1] for x in pk_wnds], [x.split('/')[0] for x in pk_wnds]))
     max_wnds = np.array([x[-2:] for x in pk_dict.values()], dtype=float)
-    print(f'Max wind {max_wnds.max()}')
+    if max_wnds:
+        print(f'Max wind {max_wnds.max()}')
+    else: 
+        pass
