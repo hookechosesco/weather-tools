@@ -233,7 +233,7 @@ if __name__ == '__main__':
     pk_wnds = [x.split('AO2 PK WND ')[1][0:10] for x in rmks if 'PK WND' in x]
     pk_dict = dict(zip([x.split('/')[1] for x in pk_wnds], [x.split('/')[0] for x in pk_wnds]))
     max_wnds = np.array([x[-2:] for x in pk_dict.values()], dtype=float)
-    if max_wnds:
+    if max_wnds.any():
         print(f'Max wind {max_wnds.max()}')
-    else: 
-        pass
+    # else: 
+        # pass
