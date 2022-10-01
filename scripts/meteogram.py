@@ -229,11 +229,12 @@ if __name__ == '__main__':
     fname, df = meteogram(icao, hoursback)
     print(f'Meteogram for {icao} created.\n{fname}\n')
 
-    rmks = df['remarks']
-    pk_wnds = [x.split('AO2 PK WND ')[1][0:10] for x in rmks if 'PK WND' in x]
-    pk_dict = dict(zip([x.split('/')[1] for x in pk_wnds], [x.split('/')[0] for x in pk_wnds]))
-    max_wnds = np.array([x[-2:] for x in pk_dict.values()], dtype=float)
-    if max_wnds.any():
-        print(f'Max wind {max_wnds.max()}')
-    # else: 
-        # pass
+    try:
+        rmks = df['remarks']
+        pk_wnds = [x.split('AO2 PK WND ')[1][0:10] for x in rmks if 'PK WND' in x]
+        pk_dict = dict(zip([x.split('/')[1] for x in pk_wnds], [x.split('/')[0] for x in pk_wnds]))
+        max_wnds = np.array([x[-2:] for x in pk_dict.values()], dtype=float)
+        if max_wnds.any():
+            print(f'Max wind {max_wnds.max()}')
+    except IndexError as e: 
+        print(e)
