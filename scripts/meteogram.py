@@ -90,7 +90,7 @@ def get_metar_meteogram(icao, hoursback=None):
     return obs
 
 
-def meteogram(icao, hoursback):
+def metar_to_df(icao, hoursback):
     icaos = [icao.upper()]
     # z = 19
     for i,icao in enumerate(icaos):
@@ -98,12 +98,25 @@ def meteogram(icao, hoursback):
         if i == 0:
             df = parse_metar_to_dataframe(txt[-1])
         for row in txt[::-1]:
-      #     if row.startswith(f'{icao} 13{z-1}'):
-      #     print(row)
-            df = df.append(parse_metar_to_dataframe(row))
+            df = pd.concat([df, parse_metar_to_dataframe(row)])
+    return df
+
+
+def meteogram(icao, hoursback):
+    # icaos = [icao.upper()]
+    # # z = 19
+    # for i,icao in enumerate(icaos):
+    #     txt = get_metar_meteogram(icao, hoursback).split('\n')[:-1]
+    #     if i == 0:
+    #         df = parse_metar_to_dataframe(txt[-1])
+    #     for row in txt[::-1]:
+    #   #     if row.startswith(f'{icao} 13{z-1}'):
+    #   #     print(row)
+    #         df = df.append(parse_metar_to_dataframe(row))
       # df = df.set_index('date_time')
       # print(df)
 #     df = df.dropna(inplace=True)
+    df = metar_to_df(icao, hoursback)
     df['tempF'] =  (df['air_temperature'] * 9/5) + 32
     df['dewF'] =  (df['dew_point_temperature'] * 9/5) + 32
     df['heat_index'] = to_heat_index(df['tempF'].values, df['dewF'].values)
@@ -206,6 +219,7 @@ def meteogram(icao, hoursback):
 if __name__ == '__main__':
     # suppress warnings about NaNs
     warnings.simplefilter('ignore')
+    warnings.simplefilter(action='ignore', category=FutureWarning)
 
     # check to see if user provided a location
     #if len(sys.argv) > 1:
